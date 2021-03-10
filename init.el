@@ -1,106 +1,69 @@
-(require 'org)
+(defconst config-el (expand-file-name "config.el" user-emacs-directory))
 
-(setq-default indent-tabs-mode nil)
-(setq org-display-inline-images t)
-(setq org-redisplay-inline-images t)
-(setq org-startup-with-inline-images "inlineimages")
 
-(setq default-frame-alist
-      (append (list '(width . 72) '(height . 40))))
+;;some general configs
 
-(setq org-confirm-elisp-link-function nil)
-      
-				  
-(global-set-key [(control z)]         'undo)
-(global-set-key "\C-x\C-x"            'execute-extended-command)
+(setq-default
+ ring-bell-function 'ignore            ; prevent beep sound.
+ inhibit-startup-screen t              ; TODO: maybe better on early-init or performance?
+ initial-major-mode 'fundamental-mode  ; TODO: maybe better on early-init or performance?
+ initial-scratch-message nil           ; TODO: maybe better on early-init?
+ create-lockfiles nil                  ; .#locked-file-name
+ confirm-kill-processes nil            ; exit emacs without asking to kill processes
+ backup-by-copying t                   ; prevent linked files
+ require-final-newline t               ; always end files with newline
+ delete-old-versions t                 ; don't ask to delete old backup files
+ revert-without-query '(".*"))         ; `revert-buffer' without confirmation
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(global-auto-revert-mode)
+
+(save-place-mode)
+
+
+
+(defun fk/add-local-hook (hook function)
+  "Add buffer-local hook."
+  (add-hook hook function nil t))
+
+;;Better Defaults
+(global-hl-line-mode)
+(blink-cursor-mode -1)
+
+(with-eval-after-load 'org       
+  (setq org-startup-indented t) ; Enable `org-indent-mode' by default
+  (add-hook 'org-mode-hook #'visual-line-mode))
+
+(setq-default
+ truncate-lines t
+ frame-resize-pixelwise t  ; maximized emacs may not fit screen without this
+ frame-title-format '((:eval
+                       (let ((project-name (projectile-project-name)))
+                         (unless (string= "-" project-name)
+                           (format "%s| " project-name))))
+                      "%b"))  ; project-name| file-name
+
+;; start in flull screen mode
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("7ea491e912d419e6d4be9a339876293fff5c8d13f6e84e9f75388063b5f794d6" "bde7af9e749d26cbcbc3e3ac2ac9b13d52aa69b6148a8d6e5117f112f2797b42" default))
+ '(initial-frame-alist '((fullscreen . maximized)))
+ '(package-selected-packages
+   '(yasnippet-snippets yasnippet flymake-aspell flymake-proselint flymake-quickdef moody modus-themes modus-operandi-theme pacmacs clojure-mode ## elpher markdown-mode pdf-tools-org org-pdftools pdf-tools multiple-cursors projectile olivetti esup ace-window avy which-key magit evil use-package)))
+
+;; remove redundant ui
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+;;font
 
 (set-frame-font "-SRC-Hack-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1")
-
-(set-frame-parameter (selected-frame) 'internal-border-width 20)
-(setq x-underline-at-descent-line t)
-(setq initial-major-mode 'text-mode)
-(setq-default line-spacing 0)
-(set-default 'cursor-type  '(hbar . 2))
-(blink-cursor-mode 0)
-(fringe-mode '(0 . 0))
-
-(setq frame-background-mode 'light)
-(set-background-color "#ffffff")
-(set-foreground-color "#666666")
-
-(setq inhibit-startup-screen t)
-(setq inhibit-startup-echo-area-message t)
-(setq inhibit-startup-message t)   ;; Show/hide startup page
-(setq initial-scratch-message nil) ;; Show/hide *scratch* buffer message
-;; (menu-bar-mode 0)                  ;; Show/hide menubar
-(tool-bar-mode 0)                  ;; Show/hide toolbar
-(tooltip-mode  0)                  ;; Show/hide tooltip
-(scroll-bar-mode 0)                ;; Show/hide scrollbar
-
-
-
-(defun mode-line-render (left right)
-  "Return a string of `window-width' length containing left, and
-   right aligned respectively."
-  (let* ((available-width (- (window-total-width) (length left) )))
-    (format (format "%%s %%%ds" available-width) left right)))
-
-
-(setq-default header-line-format
-  '(:eval (mode-line-render
-
-   (format-mode-line
-    (list
-     (propertize "File " 'face `(:weight regular))
-     "%b "
-     '(:eval (if (and buffer-file-name (buffer-modified-p))
-         (propertize "(modified)" 
-		     'face `(:weight light
-			     :foreground "#aaaaaa"))))))
-   
-   (format-mode-line
-    (propertize "%3l:%2c "
-	'face `(:weight light :foreground "#aaaaaa"))))))
-
-(set-face-attribute 'region nil
-		    :background "#f0f0f0")
-(set-face-attribute 'highlight nil
-		    :foreground "black"
-		    :background "#f0f0f0")
-(set-face-attribute 'org-level-1 nil
-		    :foreground "black"
-		    :weight 'regular)
-(set-face-attribute 'org-link nil
-		    :underline nil
-		    :foreground "dark blue")
-(set-face-attribute 'org-verbatim nil
-		    :foreground "dark blue")
-(set-face-attribute 'bold nil
- 		    :foreground "black"
-		    :weight 'regular)
-
-
-(setq-default mode-line-format   "")
-
-(set-face-attribute 'header-line nil
-;;                    :weight 'regular
-		    :height 140
-                    :underline "black"
-                    :foreground "black"
-		    :background "white"
-                    :box `(:line-width 3 :color "white" :style nil))
-(set-face-attribute 'mode-line nil
-                    :height 10
-                    :underline "black"
-                    :background "white"
-		                :foreground "white"
-                    :box nil)
-(set-face-attribute 'mode-line-inactive nil
-                    :box nil
-                    :inherit 'mode-line)
-(set-face-attribute 'mode-line-buffer-id nil 
-                    :weight 'light)
-(setq org-hide-emphasis-markers t)
 
 ;; configure use package
 (require 'package)
@@ -121,12 +84,7 @@
   :demand t
   :config
   (evil-mode 1))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (ace-window avy which-key magit evil use-package))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -135,4 +93,4 @@
  )
 
 ;; configure packages
-(load "~/.emacs.d/config.el")
+(load-file config-el)
