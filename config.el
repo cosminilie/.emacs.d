@@ -2,6 +2,36 @@
 ;; settings
 
 
+;;orgmode
+
+(setq org-agenda-files (append
+      (directory-files-recursively "~/_worknotes/" "\\.org$")
+      (directory-files-recursively "~/_personal_workspace/personal_notes/" "\\.org$")))
+
+;;diagrams
+
+(require 'subr-x)
+(setq homebrew-plantuml-jar-path
+      (expand-file-name
+       (string-trim
+        (shell-command-to-string "brew list plantuml | grep jar"))))
+
+
+(use-package plantuml-mode
+  :mode (("\\.puml$" . plantuml-mode)
+         ("\\.plantuml$" . plantuml-mode))
+  :config
+    (setq plantuml-jar-path homebrew-plantuml-jar-path)
+    (setq plantuml-default-exec-mode 'jar)
+  )
+
+;; org mode babel 
+(use-package ob-plantuml
+  :ensure nil
+  :after org
+  :custom
+  (org-plantuml-jar-path homebrew-plantuml-jar-path))
+
 ;; Abreviations
 (use-package abbrev
     :ensure nil
@@ -33,6 +63,8 @@
   (setq ispell-dictionary "en_US")
   (setq ispell-program-name (executable-find "/usr/local/bin/aspell"))
   (setq ispell-silently-savep t)
+  :bind  (("C-; b" . flyspell-buffer)
+          ("C-; w" . flyspell-correct-at-point))
   :hook
   (text-mode-hook . flymake-aspell-setup)
   (prog-mode-hook . flymake-aspell-setup))
@@ -52,13 +84,13 @@
 ;;   )
 
 ;; Proslint for long form
-(use-package flymake-proselint
-  :ensure flymake-quickdef
-  :config
-  (add-hook 'text-mode-hook (lambda ()
-                            (flymake-mode +1)
-                            (flymake-proselint-setup)))
-)
+;;(use-package flymake-proselint
+;;  :ensure flymake-quickdef
+;;  :config
+;;  (add-hook 'text-mode-hook (lambda ()
+;;                            (flymake-mode +1)
+;;                            (flymake-proselint-setup)))
+;;)
 
 ;; Completion using ivy
 ;; (use-package flyspell-correct-ivy
@@ -216,3 +248,25 @@
     (moody-replace-mode-line-buffer-identification)
     (moody-replace-vc-mode))
 
+;; configuration and programing languages
+
+(use-package lsp-mode
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+         (typescript-mode . lsp)
+         (golang-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui :commands lsp-ui-mode)
+;; if you are ivy user
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+;; optional if you want which-key integration
+(use-package which-key
+    :config
+    (which-key-mode))

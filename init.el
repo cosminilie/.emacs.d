@@ -54,7 +54,7 @@
    '("7ea491e912d419e6d4be9a339876293fff5c8d13f6e84e9f75388063b5f794d6" "bde7af9e749d26cbcbc3e3ac2ac9b13d52aa69b6148a8d6e5117f112f2797b42" default))
  '(initial-frame-alist '((fullscreen . maximized)))
  '(package-selected-packages
-   '(yasnippet-snippets yasnippet flymake-aspell flymake-proselint flymake-quickdef moody modus-themes modus-operandi-theme pacmacs clojure-mode ## elpher markdown-mode pdf-tools-org org-pdftools pdf-tools multiple-cursors projectile olivetti esup ace-window avy which-key magit evil use-package)))
+   '(counsel company plantuml-mode lsp-ivy lsp-ui lsp-mode typescript-mode web-mode yasnippet-snippets yasnippet flymake-aspell flymake-proselint flymake-quickdef moody modus-themes modus-operandi-theme pacmacs clojure-mode ## elpher markdown-mode pdf-tools-org org-pdftools pdf-tools multiple-cursors projectile olivetti esup ace-window avy which-key magit evil use-package)))
 
 ;; remove redundant ui
 (menu-bar-mode -1)
